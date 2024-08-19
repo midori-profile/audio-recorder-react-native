@@ -1,1 +1,2 @@
-# audio-recorder-react-native
+# React Native Expo Audio Recorder App
+
