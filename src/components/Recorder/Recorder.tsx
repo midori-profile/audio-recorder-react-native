@@ -314,7 +314,6 @@ export const Recorder = forwardRef(
         console.log(1)
         newSound.setOnPlaybackStatusUpdate(handlePlaybackStatus);
         console.log(2)
-        console.log('uri: ', uri);
         await newSound.loadAsync({ uri });
         await newSound.setProgressUpdateIntervalAsync(progressInterval);
         // Sync position and duration ms
@@ -333,14 +332,14 @@ export const Recorder = forwardRef(
         console.log(87987982123123124)
         console.log(87987982123123123222)
         // @ts-ignore
-        // recordingSegments.current.push({
-        //   uri,
-        //   meterings: [...meterings],
-        //   duration: durationMillis,
-        // });
+        recordingSegments.current.push({
+          uri,
+          meterings: [...meterings],
+          duration: durationMillis,
+        });
       }
       console.log(8798798212312312323)
-      // onRecordStop?.(recordingSegments.current);
+      onRecordStop?.(recordingSegments.current);
       console.log(111)
       recording.current = undefined;
       console.log(2222)

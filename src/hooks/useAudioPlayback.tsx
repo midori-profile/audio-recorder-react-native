@@ -11,50 +11,49 @@ export const useAudioPlayback = (recording: Recording) => {
   async function onPlaybackStatusUpdate(newStatus: AVPlaybackStatus) {
     setStatus(newStatus);
 
-    // If playback finishes, reset the position and pause the sound
-    // if (newStatus.isLoaded && newStatus.didJustFinish) {
-    //   await stopSound();
-    // }
     if (newStatus.isLoaded && newStatus.didJustFinish) {
       if (currentSoundIndex < sounds.length - 1) {
-        setCurrentSoundIndex(currentSoundIndex + 1);
-        await sounds[currentSoundIndex + 1].playAsync();
+        const nextIndex = currentSoundIndex + 1;
+        setCurrentSoundIndex(nextIndex);
+        await sounds[nextIndex].playAsync();
       } else {
         await stopSound();
       }
     }
   }
+
   async function loadSounds() {
     if (Array.isArray(recording.uri)) {
       const loadedSounds = await Promise.all(
         recording.uri.map(async (uri) => {
           const { sound } = await Audio.Sound.createAsync(
             { uri },
-            { progressUpdateIntervalMillis: 1000 / 60 },
-            onPlaybackStatusUpdate
+            { progressUpdateIntervalMillis: 1000 / 60 }
           );
           return sound;
         })
       );
       setSounds(loadedSounds);
-      
     } else {
       const { sound } = await Audio.Sound.createAsync(
         { uri: recording.uri },
-        { progressUpdateIntervalMillis: 1000 / 60 },
-        onPlaybackStatusUpdate
+        { progressUpdateIntervalMillis: 1000 / 60 }
       );
       setSounds([sound]);
     }
   }
+
   async function playSound() {
     if (!sounds.length) return;
-    
-    if (status?.isPlaying) {
-      await sounds[currentSoundIndex].pauseAsync();
-    } else {
+
+    // Attach the status update callback to the current sound
+    sounds[currentSoundIndex].setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+
+    // if (status?.isPlaying) {
+    //   await sounds[currentSoundIndex].pauseAsync();
+    // } else {
       await sounds[currentSoundIndex].playAsync();
-    }
+    // }
   }
 
   async function pauseSound() {
@@ -64,11 +63,14 @@ export const useAudioPlayback = (recording: Recording) => {
 
   async function stopSound() {
     if (!sounds.length) return;
-    await sounds[currentSoundIndex].stopAsync();
-    await sounds[currentSoundIndex].setPositionAsync(0);
-    setCurrentSoundIndex(0);
-  }
 
+    for (const sound of sounds) {
+      await sound.stopAsync();
+      await sound.setPositionAsync(0);
+    }
+    setCurrentSoundIndex(0);
+    setStatus(null);
+  }
 
   useEffect(() => {
     loadSounds();
@@ -88,5 +90,6 @@ export const useAudioPlayback = (recording: Recording) => {
     playSound,
     pauseSound,
     stopSound, // Expose stopSound for use in the UI
+    currentSoundIndex,
   };
 };

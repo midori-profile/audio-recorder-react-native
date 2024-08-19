@@ -33,6 +33,7 @@ export const useAudioRecorder = () => {
           metering: mergedMeterings,
           timestamp: Date.now(),
           duration: totalDuration,
+          durations: recordingsArray.map((rec) => rec.duration),
         },
         ...existingRecordings,
       ]);

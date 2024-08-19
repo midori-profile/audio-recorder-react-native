@@ -3,6 +3,7 @@ export type Recording = {
   metering: number[];
   timestamp: number;
   duration: number;
+  durations?: number[];
 };
 
 export type RawRecording = {
