@@ -28,6 +28,7 @@ import { useThemeColor } from "../hooks/useThemeColor";
 import { Box } from "./Box";
 import { Spacing } from "../constants/Spacing";
 import { formatTimer } from "../utils/formatTimer";
+import { RawRecording } from "../types/Recording";
 
 const RECORD_BUTTON_SIZE = 60;
 const RECORDING_INDICATOR_COLOR = "#4169E1";
@@ -45,7 +46,7 @@ export interface ThemedRecorderSheetProps {
   onStopPress?: () => void; // New prop for stopping recording
   onStartPress?: () => void; // New prop for starting recording
   onRecordingComplete: (
-    recordings: { uri: string; duration: number; meterings: number[] }[]
+    recordings: RawRecording[]
   ) => void;
 }
 
@@ -141,10 +142,12 @@ export const ThemedRecorderSheet = forwardRef(
     };
 
     const doneRecording = async () => {
+      console.log(1111111)
+      console.log('recorderRef.current: ', recorderRef.current);
       if (recorderRef.current) {
+        console.log(222222)
         await recorderRef.current.stopRecording(); // Stop recording
       }
-      // onStopPress(); // Add the recording to the FlatList
     };
 
     return (
@@ -170,15 +173,12 @@ export const ThemedRecorderSheet = forwardRef(
             setIsRecording(true);
           }}
           onRecordStop={(recordingsArray) => {
+            console.log('recordingsArray11111: ', recordingsArray);
             scale.value = withSpring(1, SPRING_SHORT_CONFIG);
             setIsRecording(false);
             setIsPaused(false);
 
-            // Use this uri. Yay! 🎉
-            // console.log(uri);
-
-            // console.log(duration);
-            // console.log(meterings);
+            
             // @ts-ignore
             onRecordingComplete(recordingsArray);
           }}

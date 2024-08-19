@@ -9,13 +9,7 @@ import {
 } from "../components/RecorderPanel";
 
 export const RecordingsScreen = () => {
-  const {
-    recordings,
-    // stopRecording,
-    // startRecording,
-    addRecording,
-    deleteRecording
-  } = useAudioRecorder();
+  const { recordings, addRecording, deleteRecording } = useAudioRecorder();
 
   const recorderRef = useRef<ThemedRecorderSheetRef>(null);
   recorderRef.current?.present();
@@ -28,16 +22,18 @@ export const RecordingsScreen = () => {
           contentContainerStyle={styles.list}
           data={recordings}
           renderItem={({ item }) => (
-            <RecordingListItem recording={item} onDelete={deleteRecording} />
+            <RecordingListItem recording={item} />
           )}
-          keyExtractor={(item) => item.uri}
+          keyExtractor={(item) =>
+            Array.isArray(item.uri) ? item.uri.join("-") : item.uri
+          }
         />
       </View>
 
       {/* Always fixed at the bottom */}
       <View style={styles.footer}>
-        <ThemedRecorderSheet 
-          ref={recorderRef} 
+        <ThemedRecorderSheet
+          ref={recorderRef}
           onRecordingComplete={addRecording}
         />
       </View>
@@ -58,7 +54,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20, // To avoid overlapping with the footer
   },
   footer: {
-    backgroundColor: '#fff', // To match the footer with the background
+    backgroundColor: "#fff", // To match the footer with the background
     borderTopWidth: 1,
     borderColor: "#ddd",
   },

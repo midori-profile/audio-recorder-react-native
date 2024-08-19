@@ -299,21 +299,28 @@ export const Recorder = forwardRef(
     };
 
     const stopRecording = async () => {
+      console.log(8798798)
       await recording.current?.stopAndUnloadAsync();
+      console.log(87987982)
       await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+      console.log(87987984)
 
       let durationMillis: number | undefined;
+      console.log(87987989)
       const uri = recording.current?.getURI();
       if (uri) {
+        console.log(87987982123123)
         const newSound = new Audio.Sound();
+        console.log(1)
         newSound.setOnPlaybackStatusUpdate(handlePlaybackStatus);
-
+        console.log(2)
+        console.log('uri: ', uri);
         await newSound.loadAsync({ uri });
         await newSound.setProgressUpdateIntervalAsync(progressInterval);
-
         // Sync position and duration ms
         const currentStatus = await newSound.getStatusAsync();
         if (currentStatus.isLoaded) {
+          console.log(8798798123123123)
           durationMillis = currentStatus.durationMillis ?? duration;
           await newSound.setPositionAsync(durationMillis);
 
@@ -323,15 +330,20 @@ export const Recorder = forwardRef(
 
         sound.current = newSound;
         recordingUri.current = uri;
-        recordingSegments.current.push({
-          uri,
-          meterings: [...meterings],
-          duration: durationMillis,
-        });
+        console.log(87987982123123124)
+        console.log(87987982123123123222)
+        // @ts-ignore
+        // recordingSegments.current.push({
+        //   uri,
+        //   meterings: [...meterings],
+        //   duration: durationMillis,
+        // });
       }
-      onRecordStop?.(recordingSegments.current);
-
+      console.log(8798798212312312323)
+      // onRecordStop?.(recordingSegments.current);
+      console.log(111)
       recording.current = undefined;
+      console.log(2222)
       // scrollX.value = 0; // 确保动画完成后重置
       setIsRecording(false);
       setIsPaused(false);

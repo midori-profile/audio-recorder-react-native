@@ -8,7 +8,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 interface Props {
   recording: Recording;
-  onDelete: (uri: string) => void; // Add an onDelete prop
+  onDelete?: (uri: string | string[]) => void; // Handle array of URIs
 }
 
 export const RecordingListItem = ({ recording, onDelete }: Props) => {
@@ -18,7 +18,7 @@ export const RecordingListItem = ({ recording, onDelete }: Props) => {
   const { metering } = recording;
 
   const position = status?.isLoaded ? status.positionMillis : 0;
-  const duration = status?.isLoaded ? status.durationMillis : 1;
+  const duration = status?.isLoaded ? recording.duration : 1;
   const progress = duration ? position / duration : 0;
 
   let lines = [];
@@ -53,9 +53,9 @@ export const RecordingListItem = ({ recording, onDelete }: Props) => {
         </View>
 
         {/* Add Delete Button */}
-        <TouchableOpacity onPress={() => onDelete(recording.uri)} style={styles.deleteButton}>
+        {/* <TouchableOpacity onPress={() => onDelete(recording.uri)} style={styles.deleteButton}>
           <FontAwesome5 name="trash" size={18} color="#a6a6a6" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );

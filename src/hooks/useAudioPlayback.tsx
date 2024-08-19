@@ -5,54 +5,78 @@ import { Recording } from "../types/Recording";
 
 export const useAudioPlayback = (recording: Recording) => {
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
-  const [sound, setSound] = useState<Sound>();
+  const [sounds, setSounds] = useState<Sound[]>([]);
+  const [currentSoundIndex, setCurrentSoundIndex] = useState(0);
 
   async function onPlaybackStatusUpdate(newStatus: AVPlaybackStatus) {
     setStatus(newStatus);
 
     // If playback finishes, reset the position and pause the sound
+    // if (newStatus.isLoaded && newStatus.didJustFinish) {
+    //   await stopSound();
+    // }
     if (newStatus.isLoaded && newStatus.didJustFinish) {
-      await stopSound();
+      if (currentSoundIndex < sounds.length - 1) {
+        setCurrentSoundIndex(currentSoundIndex + 1);
+        await sounds[currentSoundIndex + 1].playAsync();
+      } else {
+        await stopSound();
+      }
     }
   }
-
-  async function loadSound() {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: recording.uri },
-      { progressUpdateIntervalMillis: 1000 / 60 },
-      onPlaybackStatusUpdate
-    );
-    setSound(sound);
+  async function loadSounds() {
+    if (Array.isArray(recording.uri)) {
+      const loadedSounds = await Promise.all(
+        recording.uri.map(async (uri) => {
+          const { sound } = await Audio.Sound.createAsync(
+            { uri },
+            { progressUpdateIntervalMillis: 1000 / 60 },
+            onPlaybackStatusUpdate
+          );
+          return sound;
+        })
+      );
+      setSounds(loadedSounds);
+      
+    } else {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: recording.uri },
+        { progressUpdateIntervalMillis: 1000 / 60 },
+        onPlaybackStatusUpdate
+      );
+      setSounds([sound]);
+    }
   }
-
   async function playSound() {
-    if (!sound) return;
+    if (!sounds.length) return;
     
     if (status?.isPlaying) {
-      await sound.pauseAsync();  // Pause if already playing
+      await sounds[currentSoundIndex].pauseAsync();
     } else {
-      await sound.playAsync();  // Play or resume from paused position
+      await sounds[currentSoundIndex].playAsync();
     }
   }
 
   async function pauseSound() {
-    if (!sound) return;
-    await sound.pauseAsync();
+    if (!sounds.length) return;
+    await sounds[currentSoundIndex].pauseAsync();
   }
 
   async function stopSound() {
-    if (!sound) return;
-    await sound.stopAsync();  // Stop playback and reset position
-    await sound.setPositionAsync(0);  // Reset position to the start
+    if (!sounds.length) return;
+    await sounds[currentSoundIndex].stopAsync();
+    await sounds[currentSoundIndex].setPositionAsync(0);
+    setCurrentSoundIndex(0);
   }
 
+
   useEffect(() => {
-    loadSound();
+    loadSounds();
 
     return () => {
-      if (sound) {
+      sounds.forEach((sound) => {
         sound.unloadAsync();
-      }
+      });
     };
   }, [recording]);
 
@@ -63,6 +87,6 @@ export const useAudioPlayback = (recording: Recording) => {
     isPlaying,
     playSound,
     pauseSound,
-    stopSound,  // Expose stopSound for use in the UI
+    stopSound, // Expose stopSound for use in the UI
   };
 };
