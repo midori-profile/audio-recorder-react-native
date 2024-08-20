@@ -18,6 +18,8 @@ export const TimeIndicator = memo(({ color, height }: TimeIndicatorProps) => {
   )
 })
 
+TimeIndicator.displayName = 'TimeIndicator'
+
 const $lineIndicator: ViewStyle = {
   position: 'absolute',
   width: 2,

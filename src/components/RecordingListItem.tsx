@@ -1,3 +1,4 @@
+import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { formatMilliseconds } from "../utils/format";
 import { Recording } from "../types/Recording";
@@ -17,8 +18,6 @@ export const RecordingListItem = ({ recording, onDelete }: Props) => {
 
   const { metering } = recording;
 
-  // const position = status?.isLoaded ? status.positionMillis : 0;
-
   const cumulativePosition = status?.isLoaded
   ? recording.durations && recording.durations.length > 0 && currentSoundIndex >= 1
       ? status.positionMillis + recording.durations[currentSoundIndex - 1]
@@ -27,8 +26,8 @@ export const RecordingListItem = ({ recording, onDelete }: Props) => {
   const duration = status?.isLoaded ? recording.duration : 1;
   const progress = duration ? cumulativePosition / duration : 0;
 
-  let lines = [];
-  let numLines = 60;
+  const lines = [];
+  const numLines = 60;
 
   for (let i = 0; i < numLines; i++) {
     const meteringIndex = Math.floor((i * metering.length) / numLines);
@@ -59,7 +58,7 @@ export const RecordingListItem = ({ recording, onDelete }: Props) => {
         </View>
 
         {/* Add Delete Button */}
-        <TouchableOpacity onPress={() => onDelete(recording.uri)} style={styles.deleteButton}>
+        <TouchableOpacity onPress={() => onDelete?.(recording.uri )} style={styles.deleteButton}>
           <FontAwesome5 name="trash" size={18} color="#a6a6a6" />
         </TouchableOpacity>
       </View>

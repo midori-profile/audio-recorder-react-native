@@ -1,4 +1,5 @@
 import type { ColorValue, ViewProps } from "react-native";
+import { RawRecording } from "./Recording";
 
 export interface PlaybackStatus {
   position: number;
@@ -86,11 +87,7 @@ export interface RecorderProps extends Omit<ViewProps, "children"> {
    * @param position - the current position it stopped.
    * @param duration - the duration of the recording
    */
-  onRecordStop?: (
-    uri?: string | null,
-    duration?: number,
-    meterings?: Metering[]
-  ) => void;
+  onRecordStop?: (recordings: RawRecording[]) => void;
 
   /**
    * Called when recording has been reset.

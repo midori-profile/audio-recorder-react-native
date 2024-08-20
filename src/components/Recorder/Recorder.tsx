@@ -19,8 +19,12 @@ import type {
   Metering,
   RecorderProps,
   RecorderRef,
-} from "./Recorder.types";
+} from "../../types/Recorder.types";
+
+import { RawRecording } from "../../types/Recording";
+
 import { Waveform } from "./Waveform";
+
 import {
   METERING_MIN_POWER,
   SPRING_CONFIG,
@@ -44,12 +48,10 @@ export const Recorder = forwardRef(
       onRecordReset,
       timelineGap = DEFAULT_TIMELINE_GAP_PER_250_MS,
       maxDuration = DEFAULT_MAX_DURATION,
-      onPauseRecording,
-      onResumeRecording,
       ...rest
     } = props;
 
-    let recordingSegments = useRef([]); // 用于存储录音片段
+    const recordingSegments = useRef<RawRecording[]>([]);
 
     const forceUpdate = useRef(0);
 
@@ -127,7 +129,7 @@ export const Recorder = forwardRef(
       if (isRecording) return;
       if (recording.current) {
         await recording.current.stopAndUnloadAsync();
-        recording.current = undefined; // 清理当前录音对象
+        recording.current = undefined;
       }
 
       setMeterings([]);
@@ -154,7 +156,6 @@ export const Recorder = forwardRef(
         onRecordStart?.(status.uri);
       } catch (error) {
         console.error("Failed to start recording:", error);
-        // Handle the error (e.g., show a message to the user)
       }
     };
 
@@ -169,8 +170,6 @@ export const Recorder = forwardRef(
 
       recordingUri.current = undefined;
       recordingSegments.current = [];
-      // @ts-ignore
-      // recordingSegments = [];
 
       await recording.current?.stopAndUnloadAsync();
       recording.current = undefined;
@@ -191,8 +190,8 @@ export const Recorder = forwardRef(
     // Pause recording
     const pauseRecording = async () => {
       if (recording.current) {
-        await recording.current.stopAndUnloadAsync(); // 停止并保存当前录音
-        const uri = recording.current.getURI(); // 获取录音的URI
+        await recording.current.stopAndUnloadAsync();
+        const uri = recording.current.getURI();
         if (uri) {
           recordingSegments.current.push({
             uri,
@@ -200,7 +199,7 @@ export const Recorder = forwardRef(
             duration: duration, // Store the duration of the segment
           });
         }
-        recording.current = undefined; // 清空当前录音
+        recording.current = undefined;
         setIsPaused(true);
         setIsRecording(false);
       }
@@ -211,20 +210,18 @@ export const Recorder = forwardRef(
       if (!isPaused) return;
       const lastSegment =
         recordingSegments.current[recordingSegments.current.length - 1];
-      // @ts-ignore
       const offsetDuration = lastSegment ? lastSegment.duration : 0;
 
-      const newRecording1 = new Audio.Recording();
-      await newRecording1.prepareToRecordAsync(
+      const newRecording = new Audio.Recording();
+      await newRecording.prepareToRecordAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
-      ); // 准备新的录音
-      await newRecording1.startAsync(); // 开始新的录音
-      recording.current = newRecording1; // 将新录音赋值给当前录音
-      // 设置更新间隔和状态更新处理函数
-      newRecording1.setProgressUpdateInterval(progressInterval);
-      newRecording1.setOnRecordingStatusUpdate((status) => {
+      );
+      await newRecording.startAsync();
+      recording.current = newRecording;
+      newRecording.setProgressUpdateInterval(progressInterval);
+      newRecording.setOnRecordingStatusUpdate((status) => {
         if (status.isRecording && status.durationMillis > 0) {
-          const adjustedDuration = status.durationMillis + offsetDuration; // 累加到前面的时间
+          const adjustedDuration = status.durationMillis + offsetDuration;
           setDuration(adjustedDuration);
 
           updatePosition(adjustedDuration);
@@ -255,26 +252,9 @@ export const Recorder = forwardRef(
       await recording.current?.stopAndUnloadAsync();
       await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
 
-      // let durationMillis: number | undefined;
       const uri = recording.current?.getURI();
       if (uri) {
-        // const newSound = new Audio.Sound();
-        // newSound.setOnPlaybackStatusUpdate(handlePlaybackStatus);
-        // await newSound.loadAsync({ uri });
-        // await newSound.setProgressUpdateIntervalAsync(progressInterval);
-        // Sync position and duration ms
-        // const currentStatus = await newSound.getStatusAsync();
-        // if (currentStatus.isLoaded) {
-        // durationMillis = currentStatus.durationMillis ?? duration;
-        // await newSound.setPositionAsync(durationMillis);
-
-        // updatePosition(durationMillis);
-        // setDuration(durationMillis);
-        // }
-
-        // sound.current = newSound;
         recordingUri.current = uri;
-        // @ts-ignore
         recordingSegments.current.push({
           uri,
           meterings: [...meterings],
@@ -283,12 +263,10 @@ export const Recorder = forwardRef(
       }
       onRecordStop?.(recordingSegments.current);
       recording.current = undefined;
-      // scrollX.value = 0; // 确保动画完成后重置
       setIsRecording(false);
       setIsPaused(false);
       setMeterings([]);
       updatePosition(0);
-      // setDuration(0);
       recordingSegments.current = [];
     };
 
@@ -332,7 +310,6 @@ export const Recorder = forwardRef(
       },
       stopRecording,
       resetRecording: async () => {
-        // if (isRecording) return;
 
         if (meterings.length > 0) {
           resetScroll(reset);
@@ -358,3 +335,5 @@ export const Recorder = forwardRef(
     );
   }
 );
+
+Recorder.displayName = 'Recorder';

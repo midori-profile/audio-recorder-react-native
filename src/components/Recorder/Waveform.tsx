@@ -170,6 +170,8 @@ export const Waveform = (props: WaveformProps) => {
   )
 }
 
+Waveform.displayName = 'Waveform'
+
 const WaveformLine = memo((props: WaveformLineProps) => {
   const { db, maxHeight, gap, color, position } = props
   return (
@@ -190,6 +192,8 @@ const WaveformLine = memo((props: WaveformLineProps) => {
     />
   )
 })
+
+WaveformLine.displayName = 'WaveformLine'
 
 const $gestureHandler: ViewStyle = {
   flexGrow: 1,
