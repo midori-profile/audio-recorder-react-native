@@ -1,4 +1,3 @@
-// @ts-ignore
 import React, {
   forwardRef,
   type Ref,
@@ -7,7 +6,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { type AVPlaybackStatus, Audio } from "expo-av";
+import { Audio } from "expo-av";
 import {
   runOnJS,
   useDerivedValue,
@@ -18,7 +17,6 @@ import {
 
 import type {
   Metering,
-  PlaybackStatus,
   RecorderProps,
   RecorderRef,
 } from "./Recorder.types";
@@ -44,8 +42,6 @@ export const Recorder = forwardRef(
       onRecordStart,
       onRecordStop,
       onRecordReset,
-      onPlaybackStart,
-      onPlaybackStop,
       timelineGap = DEFAULT_TIMELINE_GAP_PER_250_MS,
       maxDuration = DEFAULT_MAX_DURATION,
       onPauseRecording,
@@ -104,26 +100,6 @@ export const Recorder = forwardRef(
       }
     });
 
-    const handlePlaybackStatus = (status: AVPlaybackStatus) => {
-      if (status.isLoaded) {
-        if (status.didJustFinish) {
-          setisPreviewPlaying(false);
-          onPlaybackStop?.({
-            position: status.positionMillis,
-            duration: status.durationMillis,
-          });
-        } else if (
-          status.isPlaying &&
-          status.positionMillis >= (status.durationMillis ?? 0)
-        ) {
-          // Android workaround: force pause when position reached duration
-          setisPreviewPlaying(false);
-          sound.current?.pauseAsync();
-        }
-
-        updatePosition(status.positionMillis);
-      }
-    };
 
     const handleRecordingStatus = (status: Audio.RecordingStatus) => {
       if (status.isRecording && status.durationMillis > 0) {
@@ -148,7 +124,6 @@ export const Recorder = forwardRef(
     };
 
     const record = async () => {
-      console.log(1);
       if (isRecording) return;
       if (recording.current) {
         await recording.current.stopAndUnloadAsync();
@@ -215,7 +190,6 @@ export const Recorder = forwardRef(
 
     // Pause recording
     const pauseRecording = async () => {
-      console.log("recording.current: ", recording.current);
       if (recording.current) {
         await recording.current.stopAndUnloadAsync(); // 停止并保存当前录音
         const uri = recording.current.getURI(); // 获取录音的URI
@@ -234,6 +208,7 @@ export const Recorder = forwardRef(
 
     // Resume recording
     const resumeRecording = async () => {
+      if (!isPaused) return;
       const lastSegment =
         recordingSegments.current[recordingSegments.current.length - 1];
       // @ts-ignore
@@ -264,12 +239,8 @@ export const Recorder = forwardRef(
         }
       });
 
-      console.log("recording.current: ", recording.current);
       setIsPaused(false);
       setIsRecording(true);
-      // scrollX.value = withTiming(-waveformMaxWidth, {
-      //   duration: progressInterval,
-      // });
     };
 
     const resetScroll = (callback: () => void) => {
@@ -280,57 +251,37 @@ export const Recorder = forwardRef(
       });
     };
 
-    const playbackAtPosition = async (ms: number) => {
-      if (!sound.current) return;
-
-      await sound.current.setPositionAsync(ms);
-      const playStatus = await sound.current.playAsync();
-
-      let status: PlaybackStatus | undefined;
-      if (playStatus.isLoaded) {
-        status = {
-          position: playStatus.positionMillis,
-          duration: playStatus.durationMillis,
-        };
-      }
-
-      onPlaybackStart?.(status);
-      setisPreviewPlaying(true);
-    };
-
     const stopRecording = async () => {
       await recording.current?.stopAndUnloadAsync();
       await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
 
-      let durationMillis: number | undefined;
+      // let durationMillis: number | undefined;
       const uri = recording.current?.getURI();
       if (uri) {
-        const newSound = new Audio.Sound();
-        newSound.setOnPlaybackStatusUpdate(handlePlaybackStatus);
-
-        await newSound.loadAsync({ uri });
-        await newSound.setProgressUpdateIntervalAsync(progressInterval);
-
+        // const newSound = new Audio.Sound();
+        // newSound.setOnPlaybackStatusUpdate(handlePlaybackStatus);
+        // await newSound.loadAsync({ uri });
+        // await newSound.setProgressUpdateIntervalAsync(progressInterval);
         // Sync position and duration ms
-        const currentStatus = await newSound.getStatusAsync();
-        if (currentStatus.isLoaded) {
-          durationMillis = currentStatus.durationMillis ?? duration;
-          await newSound.setPositionAsync(durationMillis);
+        // const currentStatus = await newSound.getStatusAsync();
+        // if (currentStatus.isLoaded) {
+        // durationMillis = currentStatus.durationMillis ?? duration;
+        // await newSound.setPositionAsync(durationMillis);
 
-          updatePosition(durationMillis);
-          setDuration(durationMillis);
-        }
+        // updatePosition(durationMillis);
+        // setDuration(durationMillis);
+        // }
 
-        sound.current = newSound;
+        // sound.current = newSound;
         recordingUri.current = uri;
+        // @ts-ignore
         recordingSegments.current.push({
           uri,
           meterings: [...meterings],
-          duration: durationMillis,
+          duration,
         });
       }
       onRecordStop?.(recordingSegments.current);
-
       recording.current = undefined;
       // scrollX.value = 0; // 确保动画完成后重置
       setIsRecording(false);
@@ -338,7 +289,6 @@ export const Recorder = forwardRef(
       setMeterings([]);
       updatePosition(0);
       // setDuration(0);
-      console.log("recordingSegments.current: ", recordingSegments.current);
       recordingSegments.current = [];
     };
 
@@ -389,35 +339,6 @@ export const Recorder = forwardRef(
         } else {
           await reset();
         }
-      },
-      startPlayback: async () => {
-        if (isRecording) return;
-        if (isPreviewPlaying) return;
-
-        const playPosition =
-          position / 100 < Math.floor(duration / 100) ? position : 0;
-        if (playPosition === 0) {
-          resetScroll(() => playbackAtPosition(0));
-        } else {
-          await playbackAtPosition(playPosition);
-        }
-      },
-      stopPlayback: async () => {
-        if (!sound.current) return;
-        if (!isPreviewPlaying) return;
-
-        const pauseStatus = await sound.current.pauseAsync();
-
-        let status: PlaybackStatus | undefined;
-        if (pauseStatus.isLoaded) {
-          status = {
-            position: pauseStatus.positionMillis,
-            duration: pauseStatus.durationMillis,
-          };
-        }
-
-        onPlaybackStop?.(status);
-        setisPreviewPlaying(false);
       },
       pauseRecording,
       resumeRecording,

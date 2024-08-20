@@ -22,12 +22,13 @@ import {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Recorder } from "./Recorder/Recorder";
-import {type RecorderRef} from "./Recorder/Recorder.types";
+import {type RecorderRef} from "../types/Recorder.types";
 
 import { useThemeColor } from "../hooks/useThemeColor";
 import { Box } from "./Box";
 import { Spacing } from "../constants/Spacing";
 import { formatTimer } from "../utils/formatTimer";
+import { RawRecording } from "../types/Recording";
 
 const RECORD_BUTTON_SIZE = 60;
 const RECORDING_INDICATOR_COLOR = "#4169E1";
@@ -45,7 +46,7 @@ export interface ThemedRecorderSheetProps {
   onStopPress?: () => void; // New prop for stopping recording
   onStartPress?: () => void; // New prop for starting recording
   onRecordingComplete: (
-    recordings: { uri: string; duration: number; meterings: number[] }[]
+    recordings: RawRecording[]
   ) => void;
 }
 
@@ -64,7 +65,9 @@ const $resumeText: TextStyle = {
   fontWeight: "bold", // 文字加粗
 };
 
-export interface ThemedRecorderSheetRef {}
+export interface ThemedRecorderSheetRef {
+  present: () => void;
+}
 
 export const ThemedRecorderSheet = forwardRef(
   (props: ThemedRecorderSheetProps, ref: Ref<ThemedRecorderSheetRef>) => {
@@ -124,11 +127,9 @@ export const ThemedRecorderSheet = forwardRef(
     const togglePauseResumeRecording = async () => {
       Haptics.selectionAsync();
       if (isPaused) {
-        console.log("resume----");
         await recorderRef.current?.resumeRecording(); // 恢复录音
         setIsPaused(false);
       } else {
-        console.log("pause----");
         await recorderRef.current?.pauseRecording(); // 暂停录音
         setIsPaused(true);
       }
@@ -144,7 +145,6 @@ export const ThemedRecorderSheet = forwardRef(
       if (recorderRef.current) {
         await recorderRef.current.stopRecording(); // Stop recording
       }
-      // onStopPress(); // Add the recording to the FlatList
     };
 
     return (
@@ -174,11 +174,7 @@ export const ThemedRecorderSheet = forwardRef(
             setIsRecording(false);
             setIsPaused(false);
 
-            // Use this uri. Yay! 🎉
-            // console.log(uri);
-
-            // console.log(duration);
-            // console.log(meterings);
+            
             // @ts-ignore
             onRecordingComplete(recordingsArray);
           }}

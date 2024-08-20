@@ -17,7 +17,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
 
-import type { Metering } from './Recorder.types'
+import type { Metering } from '../../types/Recorder.types'
 
 import {
   METERING_MAX_POWER,

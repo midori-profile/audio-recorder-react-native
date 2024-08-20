@@ -8,18 +8,24 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 interface Props {
   recording: Recording;
-  onDelete: (uri: string) => void; // Add an onDelete prop
+  onDelete?: (uri: string | string[]) => void; // Handle array of URIs
 }
 
 export const RecordingListItem = ({ recording, onDelete }: Props) => {
-  const { status, isPlaying, playSound, pauseSound, stopSound } =
+  const { status, isPlaying, playSound, pauseSound, stopSound, currentSoundIndex } =
     useAudioPlayback(recording);
 
   const { metering } = recording;
 
-  const position = status?.isLoaded ? status.positionMillis : 0;
-  const duration = status?.isLoaded ? status.durationMillis : 1;
-  const progress = duration ? position / duration : 0;
+  // const position = status?.isLoaded ? status.positionMillis : 0;
+
+  const cumulativePosition = status?.isLoaded
+  ? recording.durations && recording.durations.length > 0 && currentSoundIndex >= 1
+      ? status.positionMillis + recording.durations[currentSoundIndex - 1]
+      : status.positionMillis
+  : 0;
+  const duration = status?.isLoaded ? recording.duration : 1;
+  const progress = duration ? cumulativePosition / duration : 0;
 
   let lines = [];
   let numLines = 60;
@@ -48,7 +54,7 @@ export const RecordingListItem = ({ recording, onDelete }: Props) => {
           <AudioWave lines={lines} progress={progress} />
 
           <Text style={styles.duration}>
-            {formatMilliseconds(position)} / {formatMilliseconds(duration)}
+            {formatMilliseconds(cumulativePosition)} / {formatMilliseconds(duration)}
           </Text>
         </View>
 
