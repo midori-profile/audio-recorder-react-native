@@ -23,7 +23,7 @@ The following table outlines the implementation status of features in the Audio 
 | Recording Status Indicator              | Yes         | Displays recording status with a visual indicator, including an audio waveform that changes color during playback. Implementation details can be found in `audio-recorder-react-native/src/components/AudioWave.tsx`. |
 | Display Recording Duration              | Yes         | Displays the duration of the recording. |
 | Save Multiple Recordings                | Yes         | Refer to the `FlatList` implementation in `audio-recorder-react-native/src/screens/RecordingsScreen.tsx`. |
-| Display List of Saved Recordings        | No          | Basic functionality implemented: The recordings are listed in reverse chronological order, with the most recent recording appearing at the top. The list is scrollable, allowing users to browse through their saved recordings|
+| Display List of Saved Recordings        | Yes          | Basic functionality implemented: The recordings are listed in reverse chronological order, with the most recent recording appearing at the top. The list is scrollable, allowing users to browse through their saved recordings|
 | Delete Saved Recordings                 | Yes          | Refer to the `onDelete` method in `audio-recorder-react-native/src/components/RecordingListItem.tsx`. |
 | Error Handling and Permissions Requests | Yes         | Error handling added for both recording and playback operations. |
 | Basic Styling                           | Yes         | Supports user-friendly styling and animations, with visual indicators for recording status and waveform animations during playback. |
