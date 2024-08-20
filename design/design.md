@@ -24,7 +24,7 @@ The following table outlines the implementation status of features in the Audio 
 | Display Recording Duration              | Yes         | Displays the duration of the recording. |
 | Save Multiple Recordings                | Yes         | Refer to the `FlatList` implementation in `audio-recorder-react-native/src/screens/RecordingsScreen.tsx`. |
 | Display List of Saved Recordings        | No          | Basic functionality implemented: The recordings are listed in reverse chronological order, with the most recent recording appearing at the top. The list is scrollable, allowing users to browse through their saved recordings|
-| Delete Saved Recordings                 | No          | Refer to the `onDelete` method in `audio-recorder-react-native/src/components/RecordingListItem.tsx`. |
+| Delete Saved Recordings                 | Yes          | Refer to the `onDelete` method in `audio-recorder-react-native/src/components/RecordingListItem.tsx`. |
 | Error Handling and Permissions Requests | Yes         | Error handling added for both recording and playback operations. |
 | Basic Styling                           | Yes         | Supports user-friendly styling and animations, with visual indicators for recording status and waveform animations during playback. |
 
@@ -42,6 +42,6 @@ The following table outlines the implementation status of features in the Audio 
 
 3. **Testing on Multiple Devices**: The app should be tested on a variety of mobile devices to ensure compatibility and performance across different platforms. Currently, the app has only been tested on an iPhone, as I only have one iPhone. Expanding testing to include Android devices and different screen sizes would help identify any platform-specific issues or optimizations needed.
 
-4. **Persistent Storage for Recordings**: An improvement could be to implement persistent storage for recordings, allowing users to save and access their recordings even after closing the app. This can be achieved by storing the recording files locally on the device using `expo-file-system` and managing the file paths with `AsyncStorage` or another suitable local storage solution. This would provide a better user experience by ensuring that recordings are not lost and can be easily accessed or managed later.
+4. Delete Saved Recordings**Persistent Storage for Recordings**: An improvement could be to implement persistent storage for recordings, allowing users to save and access their recordings even after closing the app. This can be achieved by storing the recording files locally on the device using `expo-file-system` and managing the file paths with `AsyncStorage` or another suitable local storage solution. This would provide a better user experience by ensuring that recordings are not lost and can be easily accessed or managed later.
 
 Feedback and discussions are welcome!
