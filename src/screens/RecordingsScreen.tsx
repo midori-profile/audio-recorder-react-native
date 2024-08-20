@@ -4,14 +4,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { RecordingListItem } from "../components/RecordingListItem";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import {
-  ThemedRecorderSheet,
-  type ThemedRecorderSheetRef,
+  RecorderPanel,
+  type RecorderPanelRef,
 } from "../components/RecorderPanel";
 
 export const RecordingsScreen = () => {
   const { recordings, addRecording, deleteRecording } = useAudioRecorder();
 
-  const recorderRef = useRef<ThemedRecorderSheetRef>(null);
+  const recorderRef = useRef<RecorderPanelRef>(null);
   recorderRef.current?.present();
 
   return (
@@ -32,7 +32,7 @@ export const RecordingsScreen = () => {
 
       {/* Always fixed at the bottom */}
       <View style={styles.footer}>
-        <ThemedRecorderSheet
+        <RecorderPanel
           ref={recorderRef}
           onRecordingComplete={addRecording}
         />
@@ -47,14 +47,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#ecf0f1",
   },
   content: {
-    flex: 1, // Take up the remaining space
+    flex: 1,
   },
   list: {
     paddingHorizontal: 16,
-    paddingBottom: 20, // To avoid overlapping with the footer
+    paddingBottom: 20,
   },
   footer: {
-    backgroundColor: "#fff", // To match the footer with the background
+    backgroundColor: "#fff",
     borderTopWidth: 1,
     borderColor: "#ddd",
   },

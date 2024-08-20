@@ -9,22 +9,30 @@ export const useAudioPlayback = (recording: Recording) => {
   const [currentSoundIndex, setCurrentSoundIndex] = useState(0);
 
   // 使用 useEffect 监听 currentSoundIndex 的变化
-useEffect(() => {
-  if (sounds.length > 0 && currentSoundIndex <= sounds.length - 1 && currentSoundIndex > 0) {
-    console.log(2);
-    sounds[currentSoundIndex].setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
-    sounds[currentSoundIndex].playAsync().then(() => {
-      console.log(3);
-    }).catch(error => {
-      console.error("播放音频时发生错误:", error);
-    });
-  }
-}, [currentSoundIndex, sounds]);
+  useEffect(() => {
+    if (
+      sounds.length > 0 &&
+      currentSoundIndex <= sounds.length - 1 &&
+      currentSoundIndex > 0
+    ) {
+      console.log(2);
+      sounds[currentSoundIndex].setOnPlaybackStatusUpdate(
+        onPlaybackStatusUpdate
+      );
+      sounds[currentSoundIndex]
+        .playAsync()
+        .then(() => {
+          console.log(3);
+        })
+        .catch((error) => {
+          console.error("播放音频时发生错误:", error);
+        });
+    }
+  }, [currentSoundIndex, sounds]);
 
   async function onPlaybackStatusUpdate(newStatus: AVPlaybackStatus) {
     setStatus(newStatus);
 
-    // 检查当前音频是否播放完毕
     if (newStatus.isLoaded && newStatus.didJustFinish) {
       if (currentSoundIndex < sounds.length - 1) {
         const nextIndex = currentSoundIndex + 1;
@@ -52,7 +60,6 @@ useEffect(() => {
       );
       setSounds(loadedSounds);
     } else {
-      
       try {
         const { sound } = await Audio.Sound.createAsync(
           { uri: recording.uri },
@@ -61,7 +68,7 @@ useEffect(() => {
         );
         setSounds([sound]);
       } catch (error) {
-        console.error('Error creating sound object:', error);
+        console.error("Error creating sound object:", error);
       }
     }
   }
@@ -107,7 +114,7 @@ useEffect(() => {
     isPlaying,
     playSound,
     pauseSound,
-    stopSound, // Expose stopSound for use in the UI
+    stopSound,
     currentSoundIndex,
   };
 };

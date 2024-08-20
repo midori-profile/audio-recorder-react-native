@@ -3,7 +3,6 @@ import React, {
   useRef,
   type Ref,
   useState,
-  useEffect,
 } from "react";
 import {
   View,
@@ -20,7 +19,6 @@ import {
   withSpring,
   type WithSpringConfig,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Recorder } from "./Recorder/Recorder";
 import {type RecorderRef} from "../types/Recorder.types";
 
@@ -39,67 +37,56 @@ const SPRING_SHORT_CONFIG: WithSpringConfig = {
   overshootClamping: true,
 };
 
-export interface ThemedRecorderSheetProps {
+export interface RecorderPanelProps {
   lightColor?: string;
   darkColor?: string;
-  recording?: Audio.Recording | undefined; // New prop for current recording
-  onStopPress?: () => void; // New prop for stopping recording
-  onStartPress?: () => void; // New prop for starting recording
+  recording?: Audio.Recording | undefined;
+  onStopPress?: () => void;
+  onStartPress?: () => void;
   onRecordingComplete: (
     recordings: RawRecording[]
   ) => void;
 }
 
 const $ovalButton: ViewStyle = {
-  width: RECORD_BUTTON_SIZE + Spacing.md * 2, // 使按钮宽度比高度大，形成椭圆
+  width: RECORD_BUTTON_SIZE + Spacing.md * 2,
   height: RECORD_BUTTON_SIZE,
   borderRadius: RECORD_BUTTON_SIZE / 2,
-  backgroundColor: RECORDING_INDICATOR_COLOR, // 使用录音指示颜色
+  backgroundColor: RECORDING_INDICATOR_COLOR,
   justifyContent: "center",
   alignItems: "center",
 };
 
 const $resumeText: TextStyle = {
-  color: "white", // 白色文字
-  fontSize: 16, // 文字大小
-  fontWeight: "bold", // 文字加粗
+  color: "white",
+  fontSize: 16,
+  fontWeight: "bold",
 };
 
-export interface ThemedRecorderSheetRef {
+export interface RecorderPanelRef {
   present: () => void;
 }
 
-export const ThemedRecorderSheet = forwardRef(
-  (props: ThemedRecorderSheetProps, ref: Ref<ThemedRecorderSheetRef>) => {
+export const RecorderPanel = forwardRef(
+  // because we must pass the ref
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (props: RecorderPanelProps, ref: Ref<RecorderPanelRef>) => {
     const {
-      lightColor,
-      darkColor,
       onRecordingComplete,
     } = props;
 
-    const insets = useSafeAreaInsets();
 
-    // 录音和播放状态的管理
     const [isRecording, setIsRecording] = useState(false);
-    const [isPlaying, setIsPlaying] = useState(false);
     const [position, setPosition] = useState(0);
-    const [isPaused, setIsPaused] = useState(false); // 新增暂停状态
+    const [isPaused, setIsPaused] = useState(false);
 
     const recorderRef = useRef<RecorderRef>(null);
 
-    const backgroundColor = useThemeColor(
-      { light: lightColor, dark: darkColor },
-      "recorderSheet"
-    );
     const progressBackgroundColor = useThemeColor({}, "recorderProgress");
-    const iconColor = useThemeColor({}, "recorderIcon");
     const tintColor = useThemeColor({}, "recorderTint");
     const timelineColor = useThemeColor({}, "recorderTimeline");
     const positionColor = useThemeColor({}, "text");
-    const recordBorderColor = useThemeColor(
-      { light: "rgba(0,0,0,0.3)" },
-      "text"
-    );
+   
     const recorderBackgroundColor = useThemeColor({}, "recorderBackground");
     const waveformInactiveColor = useThemeColor({}, "recorderWaveformInactive");
 
@@ -113,29 +100,24 @@ export const ThemedRecorderSheet = forwardRef(
 
       Haptics.selectionAsync();
       if (isRecording) {
-        // onStopPress();
         await recorderRef.current?.stopRecording();
       } else {
-        // onStartPress();
         await recorderRef.current?.startRecording();
-        setIsPaused(false); // 开始录音时重置暂停状态
+        setIsPaused(false);
       }
     };
-
-    // 新增：暂停或恢复录音
 
     const togglePauseResumeRecording = async () => {
       Haptics.selectionAsync();
       if (isPaused) {
-        await recorderRef.current?.resumeRecording(); // 恢复录音
+        await recorderRef.current?.resumeRecording();
         setIsPaused(false);
       } else {
-        await recorderRef.current?.pauseRecording(); // 暂停录音
+        await recorderRef.current?.pauseRecording();
         setIsPaused(true);
       }
     };
 
-    // 重置录音
     const resetRecording = async () => {
       Haptics.selectionAsync();
       await recorderRef.current?.resetRecording();
@@ -160,7 +142,6 @@ export const ThemedRecorderSheet = forwardRef(
           onRecordReset={() => {
             scale.value = 1;
             setIsRecording(false);
-            setIsPlaying(false);
           }}
           onRecordStart={() => {
             scale.value = withSpring(
@@ -173,13 +154,8 @@ export const ThemedRecorderSheet = forwardRef(
             scale.value = withSpring(1, SPRING_SHORT_CONFIG);
             setIsRecording(false);
             setIsPaused(false);
-
-            
-            // @ts-ignore
             onRecordingComplete(recordingsArray);
           }}
-          onPlaybackStart={() => setIsPlaying(true)}
-          onPlaybackStop={() => setIsPlaying(false)}
           onPositionChange={(pos: number) => setPosition(pos)}
         />
         {/* 录音时间 */}
@@ -206,14 +182,14 @@ export const ThemedRecorderSheet = forwardRef(
             {isRecording ? (
               <TouchableOpacity
                 activeOpacity={0.8}
-                style={[$ovalButton, $recordControl]} // 保持原来的样式
+                style={[$ovalButton, $recordControl]}
                 onPress={togglePauseResumeRecording}
               >
                 {isPaused ? (
-                  <Text style={[$resumeText]}>Resume</Text> // 使用红色文字
+                  <Text style={[$resumeText]}>Resume</Text>
                 ) : (
                   <Ionicons
-                    name="pause" // 显示暂停图标
+                    name="pause"
                     size={Spacing.xl}
                     style={{ color: "white" }}
                   />
@@ -223,8 +199,8 @@ export const ThemedRecorderSheet = forwardRef(
               <Box>
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  style={[$ovalButton, $recordControl]} // 使用与Resume相同的椭圆样式
-                  onPress={toggleRecording} // 保持原有的功能
+                  style={[$ovalButton, $recordControl]}
+                  onPress={toggleRecording}
                 >
                   <Text style={[$resumeText]}>Start</Text>
                 </TouchableOpacity>
@@ -248,6 +224,7 @@ export const ThemedRecorderSheet = forwardRef(
   }
 );
 
+RecorderPanel.displayName = "RecorderPanel";
 
 const $recordControl: ViewStyle = {
   padding: Spacing.md,

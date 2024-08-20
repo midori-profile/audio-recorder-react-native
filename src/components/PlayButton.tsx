@@ -1,3 +1,4 @@
+import React from 'react';
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 
@@ -11,7 +12,6 @@ interface Props {
 export const PlayButton = ({ isPlaying, onPlay, onPause, onStop }: Props) => {
   return (
     <View style={styles.container}>
-      {/* Play/Pause Button */}
       <TouchableOpacity onPress={isPlaying ? onPause : onPlay} style={styles.button}>
         <FontAwesome5
           name={isPlaying ? "pause" : "play"}
