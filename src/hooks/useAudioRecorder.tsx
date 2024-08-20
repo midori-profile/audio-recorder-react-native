@@ -5,13 +5,11 @@ export const useAudioRecorder = () => {
   const [recordings, setRecordings] = useState<Recording[]>([]);
 
   const addRecording = (recordingsArray: RawRecording[]) => {
-    console.log("recordingsArray: ", recordingsArray);
-    // no pause and resume
+    // if there was no pause and resume
     if (recordingsArray.length === 1) {
       const { uri, meterings, duration } = recordingsArray[0];
       if (uri) {
         const meteringNumbers = meterings.map((item) => item.db);
-        console.log('meteringNumbers: ', meteringNumbers);
 
         setRecordings((existingRecordings) => [
           { uri, metering: meteringNumbers, timestamp: Date.now(), duration },
@@ -25,7 +23,6 @@ export const useAudioRecorder = () => {
         (item) => item.db
       );
       const totalDuration = recordingsArray[recordingsArray.length - 1].duration;
-      console.log("totalDuration: ", totalDuration);
 
       setRecordings((existingRecordings) => [
         {
@@ -38,23 +35,19 @@ export const useAudioRecorder = () => {
         ...existingRecordings,
       ]);
     }
-
-    // const {uri, meterings, duration} = recordingsArray[0]
-    // if (uri) {
-    //   // 格式化后的 metering 数据
-    //   const meteringNumbers = meterings.map((item) => item.db);
-
-    //   setRecordings((existingRecordings) => [
-    //     { uri, metering: meteringNumbers, timestamp: Date.now(), duration },
-    //     ...existingRecordings,
-    //   ]);
-
-    // }
   };
 
-  const deleteRecording = (uri: string) => {
+  const deleteRecording = (uri: string | string[]) => {
     setRecordings((currentRecordings) =>
-      currentRecordings.filter((rec) => rec.uri !== uri)
+      currentRecordings.filter((rec) => {
+        if (typeof uri === 'string' && typeof rec.uri === 'string') {
+          return rec.uri !== uri;
+        }
+        if (Array.isArray(uri) && Array.isArray(rec.uri)) {
+          return rec.uri.join('') !== uri.join('');
+        }
+        return true;
+      })
     );
   };
 

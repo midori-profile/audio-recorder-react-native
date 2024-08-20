@@ -22,7 +22,7 @@ import {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Recorder } from "./Recorder/Recorder";
-import {type RecorderRef} from "./Recorder/Recorder.types";
+import {type RecorderRef} from "../types/Recorder.types";
 
 import { useThemeColor } from "../hooks/useThemeColor";
 import { Box } from "./Box";
@@ -65,7 +65,9 @@ const $resumeText: TextStyle = {
   fontWeight: "bold", // 文字加粗
 };
 
-export interface ThemedRecorderSheetRef {}
+export interface ThemedRecorderSheetRef {
+  present: () => void;
+}
 
 export const ThemedRecorderSheet = forwardRef(
   (props: ThemedRecorderSheetProps, ref: Ref<ThemedRecorderSheetRef>) => {
@@ -125,11 +127,9 @@ export const ThemedRecorderSheet = forwardRef(
     const togglePauseResumeRecording = async () => {
       Haptics.selectionAsync();
       if (isPaused) {
-        console.log("resume----");
         await recorderRef.current?.resumeRecording(); // 恢复录音
         setIsPaused(false);
       } else {
-        console.log("pause----");
         await recorderRef.current?.pauseRecording(); // 暂停录音
         setIsPaused(true);
       }
@@ -142,10 +142,7 @@ export const ThemedRecorderSheet = forwardRef(
     };
 
     const doneRecording = async () => {
-      console.log(1111111)
-      console.log('recorderRef.current: ', recorderRef.current);
       if (recorderRef.current) {
-        console.log(222222)
         await recorderRef.current.stopRecording(); // Stop recording
       }
     };
@@ -173,7 +170,6 @@ export const ThemedRecorderSheet = forwardRef(
             setIsRecording(true);
           }}
           onRecordStop={(recordingsArray) => {
-            console.log('recordingsArray11111: ', recordingsArray);
             scale.value = withSpring(1, SPRING_SHORT_CONFIG);
             setIsRecording(false);
             setIsPaused(false);

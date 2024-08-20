@@ -8,16 +8,33 @@ export const useAudioPlayback = (recording: Recording) => {
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [currentSoundIndex, setCurrentSoundIndex] = useState(0);
 
+  // 使用 useEffect 监听 currentSoundIndex 的变化
+useEffect(() => {
+  if (sounds.length > 0 && currentSoundIndex <= sounds.length - 1 && currentSoundIndex > 0) {
+    console.log(2);
+    sounds[currentSoundIndex].setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+    sounds[currentSoundIndex].playAsync().then(() => {
+      console.log(3);
+    }).catch(error => {
+      console.error("播放音频时发生错误:", error);
+    });
+  }
+}, [currentSoundIndex, sounds]);
+
   async function onPlaybackStatusUpdate(newStatus: AVPlaybackStatus) {
     setStatus(newStatus);
 
+    // 检查当前音频是否播放完毕
     if (newStatus.isLoaded && newStatus.didJustFinish) {
       if (currentSoundIndex < sounds.length - 1) {
         const nextIndex = currentSoundIndex + 1;
         setCurrentSoundIndex(nextIndex);
-        await sounds[nextIndex].playAsync();
       } else {
-        await stopSound();
+        for (const sound of sounds) {
+          await sound.stopAsync();
+          await sound.setPositionAsync(0);
+        }
+        setCurrentSoundIndex(0);
       }
     }
   }
@@ -35,11 +52,17 @@ export const useAudioPlayback = (recording: Recording) => {
       );
       setSounds(loadedSounds);
     } else {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: recording.uri },
-        { progressUpdateIntervalMillis: 1000 / 60 }
-      );
-      setSounds([sound]);
+      
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: recording.uri },
+          { progressUpdateIntervalMillis: 1000 / 60 },
+          onPlaybackStatusUpdate
+        );
+        setSounds([sound]);
+      } catch (error) {
+        console.error('Error creating sound object:', error);
+      }
     }
   }
 
@@ -47,13 +70,8 @@ export const useAudioPlayback = (recording: Recording) => {
     if (!sounds.length) return;
 
     // Attach the status update callback to the current sound
-    sounds[currentSoundIndex].setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
-
-    // if (status?.isPlaying) {
-    //   await sounds[currentSoundIndex].pauseAsync();
-    // } else {
-      await sounds[currentSoundIndex].playAsync();
-    // }
+    sounds[0].setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+    await sounds[0].playAsync();
   }
 
   async function pauseSound() {

@@ -22,7 +22,7 @@ export const RecordingsScreen = () => {
           contentContainerStyle={styles.list}
           data={recordings}
           renderItem={({ item }) => (
-            <RecordingListItem recording={item} />
+            <RecordingListItem recording={item} onDelete={deleteRecording}/>
           )}
           keyExtractor={(item) =>
             Array.isArray(item.uri) ? item.uri.join("-") : item.uri

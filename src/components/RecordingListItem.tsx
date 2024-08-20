@@ -24,7 +24,6 @@ export const RecordingListItem = ({ recording, onDelete }: Props) => {
       ? status.positionMillis + recording.durations[currentSoundIndex - 1]
       : status.positionMillis
   : 0;
-  console.log('cumulativePosition: ', cumulativePosition);
   const duration = status?.isLoaded ? recording.duration : 1;
   const progress = duration ? cumulativePosition / duration : 0;
 
@@ -60,9 +59,9 @@ export const RecordingListItem = ({ recording, onDelete }: Props) => {
         </View>
 
         {/* Add Delete Button */}
-        {/* <TouchableOpacity onPress={() => onDelete(recording.uri)} style={styles.deleteButton}>
+        <TouchableOpacity onPress={() => onDelete(recording.uri)} style={styles.deleteButton}>
           <FontAwesome5 name="trash" size={18} color="#a6a6a6" />
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </View>
     </View>
   );

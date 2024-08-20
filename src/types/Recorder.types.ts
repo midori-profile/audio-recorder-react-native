@@ -98,18 +98,6 @@ export interface RecorderProps extends Omit<ViewProps, "children"> {
   onRecordReset?: () => void;
 
   /**
-   * Called when playback has started.
-   * @param status - the current position it started.
-   */
-  onPlaybackStart?: (status?: PlaybackStatus) => void;
-
-  /**
-   * Called when playback has stopped.
-   * @param status - the current position it stopped.
-   */
-  onPlaybackStop?: (status?: PlaybackStatus) => void;
-
-  /**
    * Called when the recording is paused.
    */
   onPauseRecording?: () => void;
@@ -124,8 +112,6 @@ export interface RecorderRef {
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<void>;
   resetRecording: () => Promise<void>;
-  startPlayback: () => Promise<void>;
-  stopPlayback: () => Promise<void>;
   resumeRecording: () => Promise<void>;
   pauseRecording: () => Promise<void>;
 }
