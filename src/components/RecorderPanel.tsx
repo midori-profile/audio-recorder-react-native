@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Text,
   type TextStyle,
+  Alert,
 } from "react-native";
 import { Audio } from "expo-av";
 import * as Haptics from "expo-haptics";
@@ -95,15 +96,30 @@ export const RecorderPanel = forwardRef(
 
 
     const toggleRecording = async () => {
-      const permissionStatus = await Audio.getPermissionsAsync();
-      if (!permissionStatus.granted) return;
-
-      Haptics.selectionAsync();
-      if (isRecording) {
-        await recorderRef.current?.stopRecording();
-      } else {
-        await recorderRef.current?.startRecording();
-        setIsPaused(false);
+      try {
+        let { granted } = await Audio.getPermissionsAsync();
+    
+        if (!granted) {
+          const { status } = await Audio.requestPermissionsAsync();
+          if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Permission to access microphone is required!');
+            return;
+          }
+          granted = status === 'granted';
+        }
+    
+        if (!granted) return;
+    
+        await Haptics.selectionAsync();
+    
+        if (isRecording) {
+          await recorderRef.current?.stopRecording();
+        } else {
+          await recorderRef.current?.startRecording();
+          setIsPaused(false);
+        }
+      } catch (error) {
+        console.error("Error while toggling recording: ", error);
       }
     };
 
