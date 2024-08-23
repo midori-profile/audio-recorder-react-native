@@ -190,54 +190,17 @@ export const Recorder = forwardRef(
     // Pause recording
     const pauseRecording = async () => {
       if (recording.current) {
-        await recording.current.stopAndUnloadAsync();
-        const uri = recording.current.getURI();
-        if (uri) {
-          recordingSegments.current.push({
-            uri,
-            meterings: [...meterings], // Store the metering data
-            duration: duration, // Store the duration of the segment
-          });
-        }
-        recording.current = undefined;
+        await recording.current.pauseAsync(); 
         setIsPaused(true);
-        setIsRecording(false);
       }
     };
 
     // Resume recording
     const resumeRecording = async () => {
-      if (!isPaused) return;
-      const lastSegment =
-        recordingSegments.current[recordingSegments.current.length - 1];
-      const offsetDuration = lastSegment ? lastSegment.duration : 0;
-
-      const newRecording = new Audio.Recording();
-      await newRecording.prepareToRecordAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      await newRecording.startAsync();
-      recording.current = newRecording;
-      newRecording.setProgressUpdateInterval(progressInterval);
-      newRecording.setOnRecordingStatusUpdate((status) => {
-        if (status.isRecording && status.durationMillis > 0) {
-          const adjustedDuration = status.durationMillis + offsetDuration;
-          setDuration(adjustedDuration);
-
-          updatePosition(adjustedDuration);
-          setMeterings((prev) => [
-            ...prev,
-            {
-              position: adjustedDuration,
-              key: adjustedDuration + prev.length,
-              db: status.metering ?? METERING_MIN_POWER,
-            },
-          ]);
-        }
-      });
-
-      setIsPaused(false);
-      setIsRecording(true);
+      if (isPaused && recording.current) {
+        await recording.current.startAsync();
+        setIsPaused(false);
+      }
     };
 
     const resetScroll = (callback: () => void) => {
