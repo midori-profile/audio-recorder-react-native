@@ -1,5 +1,6 @@
 # Audio Recorder App
 
+
 This is a React Native application built with Expo that allows users to record audio, pause/resume recordings, and play back the recorded audio. The app uses Expo's Audio API to handle recording and playback functionalities and is designed with user-friendly UI components.
 
 ## Project Overview
